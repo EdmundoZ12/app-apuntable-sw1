@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 
 class DioClient {
   final Dio _dio = Dio();
-  // final String _baseUrl = 'https://backend-sw1.onrender.com';
-  final String _baseUrl = 'http://192.168.100.54:3000';
+  final String _baseUrl = 'https://backend-sw1.onrender.com';
+  // final String _baseUrl = 'http://192.168.100.54:3000';
 
 
   DioClient() {

@@ -1,4 +1,4 @@
-package com.apuntable.apuntables
+package com.edmundozr.apuntables
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,4 +1,6 @@
+import 'package:apuntables/screens/SharedNotesScreen.dart';
 import 'package:apuntables/screens/login_screen.dart';
+import 'package:apuntables/screens/personal_notes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -210,17 +212,35 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   _buildMenuTile(
-                    icon: Icons.list_outlined,
-                    title: 'Mis Tareas',
-                    subtitle: 'Gestiona tus tareas pendientes',
-                    onTap: () {},
+                    icon: Icons.book_outlined,
+                    title: 'Mis Apuntes',
+                    subtitle: 'Ver mis Propios Apuntes',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PersonalNotesScreen(
+                            userEmail: user?.email ?? '',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   _buildMenuTile(
-                    icon: Icons.calendar_today_outlined,
-                    title: 'Calendario',
-                    subtitle: 'Ver calendario de actividades',
-                    onTap: () {},
+                    icon: Icons.share_sharp,
+                    title: 'Compartidos conmigo',
+                    subtitle: 'Ver Apuntes compartidos conmigo',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SharedNotesScreen(
+                            userEmail: user?.email ?? '',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   _buildMenuTile(
