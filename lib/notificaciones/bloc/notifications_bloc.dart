@@ -5,7 +5,6 @@ import 'package:apuntables/models/push_message.dart';
 import 'package:apuntables/notificaciones/bloc/notifications_state.dart';
 import 'package:apuntables/services/variables.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 

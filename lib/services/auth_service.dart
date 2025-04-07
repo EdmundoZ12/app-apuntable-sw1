@@ -53,22 +53,48 @@ class AuthService {
         'telefono': telefono,
       });
 
+      // Asegurar que todos los valores estén limpios antes de enviar
+      final Map<String, dynamic> requestData = {
+        'nombre': nombre.trim(),
+        'apellido': apellido.trim(),
+        'email': email.trim(),
+        'password': password,
+        'telefono': telefono.trim(),
+      };
+
+      print('📤 Enviando datos al servidor:');
+      print(requestData);
+
       final response = await _dioClient.dio.post(
         '/usuarios/register',
-        data: {
-          'nombre': nombre,
-          'apellido': apellido,
-          'email': email,
-          'password': password,
-          'telefono': telefono,
-        },
+        data: requestData,
       );
 
       print('✅ Registro exitoso:');
       print('Status code: ${response.statusCode}');
       print('Data: ${response.data}');
 
-      return User.fromJson(response.data);
+      // Crear un objeto User a partir de la respuesta
+      final user = User.fromJson(response.data);
+      print(
+          '👤 Usuario creado: ${user.nombre} ${user.apellido} (ID: ${user.id})');
+
+      // Intentar obtener y guardar el token FCM
+      try {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          print('🔔 Guardando token FCM para el nuevo usuario: $fcmToken');
+          await saveTokenDevice(
+            email: email,
+            tokenDevice: fcmToken,
+          );
+        }
+      } catch (e) {
+        print('⚠️ No se pudo guardar el token FCM: $e');
+        // No lanzamos excepción aquí para que no falle el registro
+      }
+
+      return user;
     } on DioException catch (e) {
       print('❌ Error DioException en registro:');
       print('Status: ${e.response?.statusCode}');

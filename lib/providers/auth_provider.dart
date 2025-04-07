@@ -27,6 +27,8 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
+      print('📱 AuthProvider: Iniciando registro de usuario');
+
       _user = await _authService.register(
         nombre: nombre,
         apellido: apellido,
@@ -35,10 +37,25 @@ class AuthProvider extends ChangeNotifier {
         telefono: telefono,
       );
 
+      print('📱 AuthProvider: Usuario registrado con éxito');
+      print('📱 Usuario: ${_user?.nombre} ${_user?.apellido}');
+      print('📱 Email: ${_user?.email}');
+      print('📱 ID: ${_user?.id}');
+
+      // Guardar datos básicos del usuario en el almacenamiento seguro
+      await _storage.write(key: 'user_id', value: _user?.id.toString());
+      await _storage.write(key: 'user_email', value: _user?.email);
+      await _storage.write(key: 'user_nombre', value: _user?.nombre);
+      await _storage.write(key: 'user_apellido', value: _user?.apellido);
+
+      print(
+          '📱 AuthProvider: Datos del usuario guardados en almacenamiento seguro');
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      print('❌ Error en AuthProvider.register: $e');
       _isLoading = false;
       notifyListeners();
       rethrow;

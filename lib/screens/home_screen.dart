@@ -4,6 +4,9 @@ import 'package:apuntables/screens/personal_notes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:apuntables/notificaciones/bloc/notifications_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -86,9 +89,81 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Función para solicitar permisos de notificaciones
+  Future<void> _requestNotificationPermission() async {
+    // Obtenemos el bloc
+    final notificationsBloc = context.read<NotificationsBloc>();
+
+    try {
+      // Solicitar permisos directamente usando Firebase Messaging
+      final messaging = FirebaseMessaging.instance;
+      final settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      // Informar al bloc del cambio de estado
+      notificationsBloc
+          .add(NotificationStatusChanged(settings.authorizationStatus));
+
+      // Mostrar mensaje según el resultado
+      if (context.mounted) {
+        String message;
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          message = 'Notificaciones activadas correctamente';
+        } else if (settings.authorizationStatus ==
+            AuthorizationStatus.provisional) {
+          message = 'Notificaciones provisionales activadas';
+        } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+          message = 'Permiso de notificaciones denegado';
+        } else {
+          message = 'No se pudo determinar el estado de las notificaciones';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: const Color(0xFF1E88E5),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Mostrar mensaje de error en caso de fallar
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al solicitar permisos: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
+      // También intentamos la forma original como respaldo
+      notificationsBloc.requestPermission();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    // Observamos el estado del bloc de notificaciones para actualizar el UI
+    final notificationsState = context.watch<NotificationsBloc>().state;
+
+    // Verificamos si las notificaciones están autorizadas
+    final bool notificationsEnabled =
+        notificationsState.status == AuthorizationStatus.authorized;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -104,6 +179,21 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 2,
         shadowColor: Colors.black12,
         actions: [
+          // Icono de notificaciones (a la izquierda del icono de cerrar sesión)
+          IconButton(
+            icon: Icon(
+              notificationsEnabled
+                  ? Icons.notifications_active
+                  : Icons.notifications_off,
+              size: 22,
+            ),
+            color: Color(0xFF1E88E5),
+            tooltip: notificationsEnabled
+                ? 'Notificaciones activas'
+                : 'Activar notificaciones',
+            onPressed: _requestNotificationPermission,
+          ),
+          // Icono de logout
           IconButton(
             icon: const Icon(Icons.logout, size: 22),
             color: Color(0xFF1E88E5),
@@ -246,8 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildMenuTile(
                     icon: Icons.notifications_outlined,
                     title: 'Notificaciones',
-                    subtitle: 'Configura tus notificaciones',
-                    onTap: () {},
+                    subtitle: notificationsEnabled
+                        ? 'Notificaciones activas'
+                        : 'Activar notificaciones',
+                    onTap: _requestNotificationPermission,
                   ),
                 ],
               ),

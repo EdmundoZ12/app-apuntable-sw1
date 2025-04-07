@@ -1,7 +1,6 @@
 import 'package:apuntables/notificaciones/bloc/notifications_bloc.dart';
 import 'package:apuntables/providers/auth_provider.dart';
 import 'package:apuntables/screens/login_screen.dart';
-import 'package:apuntables/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';

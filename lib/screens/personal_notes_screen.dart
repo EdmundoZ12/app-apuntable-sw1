@@ -53,6 +53,7 @@ class _PersonalNotesScreenState extends State<PersonalNotesScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      //TODO:
       print('Error al abrir URL: $e');
     }
   }
